@@ -4,7 +4,7 @@ from .models import Printer, Check
 from .serializers import PrinterSerializer, CheckSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from .utils import html_to_pdf
+from .utils import html_to_pdf, print_check
 
     
 @csrf_exempt
@@ -31,10 +31,20 @@ def create_check(request):
                 'check_type': check_type,
                 'printer_id': printer.id,
                 'status': Check.NEW_STATUS,
-                'check_obj': check
+                'check_obj': check,
+                'order': order_data
             }
             html_to_pdf(context)
             return JsonResponse({'success': 'Check created successfully', 'check_id': check.id}, status=200)
     
     return JsonResponse({'success': 'printing completed'}, status=200)
     
+
+@csrf_exempt
+def print_checks(request):
+    checks = Check.objects.filter(status=Check.NEW_STATUS)
+    if request.method == "POST":
+        print_check(checks)
+        return JsonResponse({'success': 'Check printed'})
+    else:
+        return JsonResponse({'error': 'ERROR'})

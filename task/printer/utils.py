@@ -4,7 +4,8 @@ import base64
 from .models import Check
 from django.template.loader import render_to_string
 from task.settings import app as celery_app
-
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 def create_html_template(check_id, check_type, context):
     
@@ -30,15 +31,24 @@ def html_to_pdf(context):
     headers = {
         'Content-Type': 'application/json',
     }
-    response = requests.post(url, data=json.dumps(data), headers=headers)
 
+    response = requests.post(url, data=json.dumps(data), headers=headers)
     if response.status_code == 200:
         pdf_file_name = f'{context.get("check_id")}_{context.get("check_type")}.pdf'
         with open(f'printer/media/pdf/{pdf_file_name}', 'wb') as pdf_file:
             pdf_file.write(response.content)
     else:
         print(f'Помилка під час створення PDF: {response.status_code} - {response.text}')
+
     
     with open(f'printer/media/pdf/{pdf_file_name}', 'rb') as f:
         file_data = f.read()
         context.get('check_obj').pdf_file.save(f'printer/media/pdf/{pdf_file_name}', f)
+
+
+
+def print_check(checks):
+    for check in checks:
+        check.status = Check.PRINTED_STATUS
+        check.save()
+    
