@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .utils import html_to_pdf, print_check
 
-    
+
 @csrf_exempt
 def create_check(request):
     if request.method == 'POST':

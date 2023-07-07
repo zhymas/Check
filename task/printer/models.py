@@ -13,6 +13,8 @@ class Printer(models.Model):
     check_type = models.CharField(max_length=100, choices=CHECK_TYPES)
     point_id = models.IntegerField()
 
+    def __str__(self) -> str:
+        return self.name
 
 class Check(models.Model):
     NEW_STATUS = 'new'
